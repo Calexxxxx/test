@@ -45,7 +45,7 @@ $(function() {
     var z = 0;
 
     for (var i = 0; i < 1000; i++) {
-      cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+      cubeGeometry = new THREE.BoxGeometry(2.5, 2.5, 2.5);
       cubeMaterial = new THREE.MeshPhongMaterial({
         color: frequencyData[i] * 0xff3300
       });
@@ -128,7 +128,7 @@ $(function() {
   function render() {
     scene.traverse(function(e) {
       if (e instanceof THREE.Mesh) {
-        e.rotation.x += frequencyData[50] / 1000;
+        e.rotation.x += frequencyData[50] / 1024;
         e.rotation.y = frequencyData[e.id] / 50;
         e.rotation.z += guiControls.rotationZ;
         var color = new THREE.Color(1, 1, 0);
