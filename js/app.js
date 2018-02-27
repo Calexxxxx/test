@@ -1,29 +1,32 @@
 $(function() {
-  var ctx = new AudioContext();
-  let audio = document.getElementById('myAudio');
-  var audioSrc = ctx.createMediaElementSource(audio);
-  var analyser = ctx.createAnalyser();
+  const ctx = new AudioContext();
+  const audio = document.getElementById('myAudio');
+  const audioSrc = ctx.createMediaElementSource(audio);
+  const analyser = ctx.createAnalyser();
+  analyser.minDecibels = -90;
+  analyser.maxDecibels = -10;
 
   audioSrc.connect(analyser);
   audioSrc.connect(ctx.destination);
   // frequencyBinCount tells you how many values you'll receive from the analyser
-  var frequencyData = new Uint8Array(analyser.frequencyBinCount);
-  var cube, cubeMaterial, cubeGeometry;
-  var scene, camera, renderer;
-  var controls, guiControls, datGUI;
-  var axis, grid, color, fov;
-  var spotLight;
-  var stats;
-  var SCREEN_WIDTH, SCREEN_HEIGHT;
+  console.log(analyser);
+  const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+  let cube, cubeMaterial, cubeGeometry;
+  let scene, camera, renderer;
+  let controls, guiControls, datGUI;
+  let axis, grid, color, fov;
+  let spotLight;
+  let stats;
+  let SCREEN_WIDTH, SCREEN_HEIGHT;
 
   function init() {
     /*creates empty scene object and renderer*/
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(
-      45,
+      90,
       window.innerWidth / window.innerHeight,
       0.1,
-      500
+      1000
     );
     renderer = new THREE.WebGLRenderer({ antialias: true });
 
@@ -40,12 +43,12 @@ $(function() {
     color = new THREE.Color('rgb(255,0,0)');
     // grid.setColors(color, 0x000000);
 
-    var x = 0;
-    var y = 0;
-    var z = 0;
+    let x = 0;
+    let y = 0;
+    let z = 0;
 
-    for (var i = 0; i < 1000; i++) {
-      cubeGeometry = new THREE.BoxGeometry(2.5, 2.5, 2.5);
+    for (let i = 0; i < 1000; i++) {
+      cubeGeometry = new THREE.SphereBufferGeometry(1, 1, 1);
       cubeMaterial = new THREE.MeshPhongMaterial({
         color: frequencyData[i] * 0xff3300
       });
@@ -70,26 +73,26 @@ $(function() {
       scene.add(cube);
     }
 
-    camera.position.x = 50;
-    camera.position.y = 50;
-    camera.position.z = 50;
+    camera.position.x = 60;
+    camera.position.y = 100;
+    camera.position.z = 100;
     camera.lookAt(scene.position);
 
     /*datGUI controls object*/
     guiControls = new function() {
-      this.rotationX = 0.2;
-      this.rotationY = 0.2;
-      this.rotationZ = 0.2;
+      this.rotationX = 0.5;
+      this.rotationY = 0.5;
+      this.rotationZ = 0.3;
 
       this.lightX = 127;
       this.lightY = 152;
       this.lightZ = 127;
-      this.intensity = 3.8;
+      this.intensity = 5;
       this.distance = 1000;
-      this.angle = 2;
+      this.angle = 3;
       this.exponent = 2;
       this.shadowCameraNear = 1;
-      this.shadowCameraFar = 434;
+      this.shadowCameraFar = 50;
       this.shadowCameraFov = 46;
       this.shadowCameraVisible = false;
       this.shadowMapWidth = 2056;
@@ -122,17 +125,17 @@ $(function() {
     stats.domElement.style.top = '0px';
     $('#webGL-container').append(stats.domElement);
     console.log(scene);
-    (fov = camera.fov), (zoom = 1.0), (inc = -0.01);
+    (fov = camera.fov), (zoom = 0), (inc = -1);
   }
 
   function render() {
     scene.traverse(function(e) {
       if (e instanceof THREE.Mesh) {
-        e.rotation.x += frequencyData[50] / 1024;
-        e.rotation.y = frequencyData[e.id] / 50;
+        e.rotation.x += frequencyData[50] / 128;
+        e.rotation.y = frequencyData[e.id] / 128;
         e.rotation.z += guiControls.rotationZ;
-        var color = new THREE.Color(1, 1, 0);
-        e.material.color.setRGB(frequencyData[e.id] / 220, 0, 0);
+        let color = new THREE.Color(1, 1, 0);
+        e.material.color.setRGB(frequencyData[e.id] / 255, 0, 0);
       }
     });
     guiControls.intensity = frequencyData[2];
@@ -140,18 +143,15 @@ $(function() {
     spotLight.position.y = guiControls.lightY;
     spotLight.position.z = guiControls.lightZ;
     analyser.getByteFrequencyData(frequencyData);
-    camera.fov = fov * zoom;
-    camera.updateProjectionMatrix();
     zoom += inc;
     if (
-      zoom <= 0.1 * (frequencyData[20] / 100) ||
-      zoom >= 1 * (frequencyData[20] / 50)
+      zoom <= 1 * (frequencyData[20] / 100) ||
+      zoom >= 1 * (frequencyData[20] / 100)
     ) {
       inc = -inc;
     }
-    camera.rotation.y = 90 * Math.PI / 180;
-    camera.rotation.z = frequencyData[20] * Math.PI / 180;
-    camera.rotation.x = frequencyData[100] * Math.PI / 180;
+    camera.rotation.y = 90 / 580;
+    camera.rotation.z = frequencyData[2] / 580;
   }
 
   function animate() {
